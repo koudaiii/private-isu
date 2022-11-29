@@ -6,3 +6,9 @@
   tasks:
     - user: name=micug groups=wheel shell=/bin/bash
     - copy: src=../files/etc/profile.d/bashrc dest=/home/micug/.profile owner=micug mode=755
+- hosts: guests:extras
+  name: Set authorized keys taken from url
+  ansible.posix.authorized_key:
+    user: micug
+    state: present
+    key: https://github.com/koudaiii.keys
