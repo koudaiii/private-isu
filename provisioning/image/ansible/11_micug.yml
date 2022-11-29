@@ -18,5 +18,4 @@
       ansible.posix.authorized_key:
         user: micug
         state: present
-#        key: https://github.com/koudaiii.keys # if you change your GitHub account name, you can use this command (ssh micug@xx.xx.xx.xx)
-        key: https://github.com/dzeyelid.keys # if you change your GitHub account name, you can use this command (ssh micug@xx.xx.xx.xx)
+        key: https://github.com/GITHUB_USER_NAME.keys # if you change your GitHub account name, you can use this command (ssh micug@xx.xx.xx.xx)
