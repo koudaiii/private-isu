@@ -48,6 +48,7 @@ Ubuntu 22.04
 * Ruby/Go/PHPの3言語が用意されており、デフォルトはRubyが起動する
   * Node.jsは現状メンテナンスされていない
   * AMI・Vagrantで他の言語の実装を動かす場合は[manual.md](/manual.md)を参考にする
+  * `dzeyelid/private-isu`では安定して起動したGoを選択している
 * AMI・Docker Compose・Vagrantが用意されている
   * 手元で適当に動かすことも難しくない
   * Ansibleを動かせば、他の環境でも動くはず
