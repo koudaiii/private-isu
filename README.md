@@ -1,3 +1,7 @@
+:bulb: この`dzeyelid/private-isu`は、`catatsuy/private-isu`をフォークし、GitHub Codespaces(Dev container)で動作するよう調整したものです。
+
+---
+
 # private-isu
 
 「[ISUCON](https://isucon.net)」は、LINE株式会社の商標または登録商標です。
