@@ -1,3 +1,7 @@
+:bulb: この`dzeyelid/private-isu`は、`catatsuy/private-isu`をフォークし、GitHub Codespaces(Dev container)で動作するよう調整したものです。
+
+---
+
 # private-isu
 
 「[ISUCON](https://isucon.net)」は、LINE株式会社の商標または登録商標です。
@@ -48,6 +52,7 @@ Ubuntu 22.04
 * Ruby/Go/PHPの3言語が用意されており、デフォルトはRubyが起動する
   * Node.jsは現状メンテナンスされていない
   * AMI・Vagrantで他の言語の実装を動かす場合は[manual.md](/manual.md)を参考にする
+  * `dzeyelid/private-isu`では安定して起動したGoを選択している
 * AMI・Docker Compose・Vagrantが用意されている
   * 手元で適当に動かすことも難しくない
   * Ansibleを動かせば、他の環境でも動くはず
