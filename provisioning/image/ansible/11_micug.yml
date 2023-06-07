@@ -1,0 +1,21 @@
+---
+- hosts: guests:extras
+#- hosts: extras
+  gather_facts: no
+  become: yes
+  tasks:
+    - group: name=wheel
+    - user: name=GITHUB_USER_NAME groups=wheel shell=/bin/bash
+    - copy: src=../files/etc/profile.d/bashrc dest=/home/GITHUB_USER_NAME/.profile owner=GITHUB_USER_NAME mode=755
+
+- hosts: guests:extras
+#- hosts: extras
+  gather_facts: no
+  become: yes
+  become_user: GITHUB_USER_NAME
+  tasks:
+    - name: Set authorized keys taken from url
+      ansible.posix.authorized_key:
+        user: GITHUB_USER_NAME
+        state: present
+        key: https://github.com/GITHUB_USER_NAME.keys # if you change your GitHub account name, you can use this command (ssh GITHUB_USER_NAME@xx.xx.xx.xx)
