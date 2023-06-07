@@ -12,5 +12,5 @@
   tasks:
     - name: create userdata
       tags: userdata
-      ansible.builtin.unarchive: src=https://github.com/koudaiii/private-isu/releases/download/img/img.zip dest=/home/isucon/private_isu/benchmarker/userdata remote_src=yes
+      ansible.builtin.unarchive: src=https://github.com/catatsuy/private-isu/releases/download/img/img.zip dest=/home/isucon/private_isu/benchmarker/userdata remote_src=yes
       when: allinone is defined and allinone
