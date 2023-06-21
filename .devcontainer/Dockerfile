@@ -4,6 +4,7 @@ FROM mcr.microsoft.com/devcontainers/universal:2
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   && apt-get -y install --no-install-recommends \
     apache2-utils \
+    mysql-server \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Install alp

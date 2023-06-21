@@ -73,7 +73,7 @@ ab -c 1 -n 10 http://localhost/
 tail -n 10 webapp/logs/nginx/access.log | alp json -o count,method,uri,min,avg,max
 ```
 
-アクセスログのローテーションは、下記に陽にnginxのDockerインスタンスにログインしてからファイルをリネームします。
+アクセスログのローテーションは、下記にようにnginxのDockerインスタンスにログインしてからファイルをリネームします。
 
 ```bash
 docker exec -it webapp-nginx-1 /bin/bash
@@ -119,13 +119,40 @@ docker stats
 ab -c 1 -t 30 http://localhost/
 ```
 
-`mysqld`がCPUを占有している
+上記の確認で、`mysqld`がCPUを占有していることがわかったので、スロークエリを出力して処理の内訳を核にしてみます。
 
-スロークエリログを出力する`my.conf`の例
+`my.cnf`に下記を記述することでスロークエリログを出力します。
 
 ```
 [mysqld]
 slow_query_log = 1
 slow_query_log_file = /var/log/mysql/mysql-slow.log
 long_query_time = 0
+```
+
+Dockerの場合は、`webapp/etc/mysql/conf.d/my.cnf`に記述し、以下のように`webapp/docker-compose.yml`でログの出力先をマウントした上で、MySQLを再起動します。（一度 `docker compose down`してから`docker compose up`がわかりやすい）
+
+`webapp/docker-compose.yml`
+
+```diff
+    mysql:
+      ...
+      volumes:
+        - ...
++       - ./logs/mysql:/var/log/mysql
+```
+
+MySQLの再起動ができたら、
+
+スロークエリの分析には`mysqldumpslow`コマンドが便利です。コマンドが見つからない場合は、`mysql-server`をインストールしてください。
+
+```bash
+mysqldumpslow webapp/logs/mysql/mysql-slow.log
+```
+
+スロークエリログのローテーションは、下記にようにmysqlのDockerインスタンスにログインしてからファイルをリネームします。
+
+```bash
+docker exec -it webapp-mysql-1 /bin/bash
+mv /var/log/mysql/mysql-slow.log /var/log/mysql/mysql-slow.log.old
 ```
