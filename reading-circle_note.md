@@ -156,3 +156,15 @@ mysqldumpslow webapp/logs/mysql/mysql-slow.log
 docker exec -it webapp-mysql-1 /bin/bash
 mv /var/log/mysql/mysql-slow.log /var/log/mysql/mysql-slow.log.old
 ```
+
+MySQLでクエリを実行する場合は、以下を実行します。
+
+```bash
+docker exec -it webapp-mysql-1 mysql -u root -p
+```
+
+```mysql
+use isuconp;
+SHOW CREATE TABLE comments;
+EXPLAIN SELECT * FROM `comments` WHERE `post_id` = 9995 ORDER BY `created_at` DESC LIMIT 3;
+```
