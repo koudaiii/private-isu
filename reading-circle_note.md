@@ -167,4 +167,5 @@ docker exec -it webapp-mysql-1 mysql -u root -p
 use isuconp;
 SHOW CREATE TABLE comments;
 EXPLAIN SELECT * FROM `comments` WHERE `post_id` = 9995 ORDER BY `created_at` DESC LIMIT 3;
+ALTER TABLE comments ADD INDEX post_id_idx(post_id);
 ```
