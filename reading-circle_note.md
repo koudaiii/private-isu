@@ -13,6 +13,7 @@ Dev containerでprivate-isuのDockerによる起動ができるように構成�
 Dockerを起動するには下記コマンドを実行します。
 
 ```bash
+cd webapp
 docker compose up
 ```
 
@@ -63,7 +64,7 @@ cat webapp/logs/nginx/access.log | alp json
 下記を実行して負荷をかけてみます。
 
 ```bash
-ab -c 1 -n 10 http://0.0.0.0/
+ab -c 1 -n 10 http://localhost/
 ```
 
 アクセスログの末尾10行を`alp`に渡して結果を比較してみます。
@@ -72,7 +73,7 @@ ab -c 1 -n 10 http://0.0.0.0/
 tail -n 10 webapp/logs/nginx/access.log | alp json -o count,method,uri,min,avg,max
 ```
 
-アクセスログのローテーションは、下記に陽にnginxのDockerインスタンスにログインしてからファイルをリネームします。
+アクセスログのローテーションは、下記にようにnginxのDockerインスタンスにログインしてからファイルをリネームします。
 
 ```bash
 docker exec -it webapp-nginx-1 /bin/bash
@@ -96,18 +97,75 @@ service nginx reload
 ここからは性能指標として、Requests per secondを用います。以下の理由です。
 
 - 負荷試験のスコアとして、パフォーマンスを改善すると向上する数値の方が感覚的にわかりやすい
-- 前節で採用したレイテンシの場合、その値を削減していくと、利用者の体感に変化がなくなる下限が存在する
+- 前節で採用したレイテンシ（レスポンスタイム）を指標とする場合、その値を削減していっても、利用者の体感に変化がなくなる下限が存在しわかりにくい
 
-負荷をかけている途中に、`top`コマンドでも観察できるようにしておきます。`1`を入力して、CPUコア個別表示に切り替えておきます。
+負荷をかけている途中、マシンの負荷を観察できるように、`top`コマンドを実行しておきます。CPUコアごとに表示したい場合は`1`を入力して切り替えておきます。
 
 ```bash
 top
 ```
 
+`top`コマンドでもDockerインスタンス内のプロセスを透過して確認することができます。
+
+また、`docker stats`コマンドを利用すると、各Dockerインスタンスごとの負荷を確認することができます。
+
+```bash
+docker stats
+```
+
 下記コマンドで負荷をかけます。
 
 ```bash
-ab -c 1 -t 10 http://0.0.0.0/
+ab -c 1 -t 30 http://localhost/
 ```
 
-`mysqld`がCPUを占有している（コアの50%を使っているという記述はどこから導いてるかわからない）
+上記の確認で、`mysqld`がCPUを占有していることがわかったので、スロークエリを出力して処理の内訳を核にしてみます。
+
+`my.cnf`に下記を記述することでスロークエリログを出力します。
+
+```
+[mysqld]
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/mysql-slow.log
+long_query_time = 0
+```
+
+Dockerの場合は、`webapp/etc/mysql/conf.d/my.cnf`に記述し、以下のように`webapp/docker-compose.yml`でログの出力先をマウントした上で、MySQLを再起動します。（一度 `docker compose down`してから`docker compose up`がわかりやすい）
+
+`webapp/docker-compose.yml`
+
+```diff
+    mysql:
+      ...
+      volumes:
+        - ...
++       - ./logs/mysql:/var/log/mysql
+```
+
+MySQLの再起動ができたら、
+
+スロークエリの分析には`mysqldumpslow`コマンドが便利です。コマンドが見つからない場合は、`mysql-server`をインストールしてください。
+
+```bash
+mysqldumpslow webapp/logs/mysql/mysql-slow.log
+```
+
+スロークエリログのローテーションは、下記にようにmysqlのDockerインスタンスにログインしてからファイルをリネームします。
+
+```bash
+docker exec -it webapp-mysql-1 /bin/bash
+mv /var/log/mysql/mysql-slow.log /var/log/mysql/mysql-slow.log.old
+```
+
+MySQLでクエリを実行する場合は、以下を実行します。
+
+```bash
+docker exec -it webapp-mysql-1 mysql -u root -p
+```
+
+```mysql
+use isuconp;
+SHOW CREATE TABLE comments;
+EXPLAIN SELECT * FROM `comments` WHERE `post_id` = 9995 ORDER BY `created_at` DESC LIMIT 3;
+ALTER TABLE comments ADD INDEX post_id_idx(post_id);
+```
